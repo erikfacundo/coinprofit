@@ -1,37 +1,52 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Variables
-    var montoInput = document.getElementById("monto");
-    var gananciaPerdidaInput = document.getElementById("gananciaPerdida");
-    var gananciaPerdidaPNLInput = document.getElementById("gananciaPerdidaPNL");
-    var ingresarMontoButton = document.getElementById("ingresarMonto");
-    var ingresarGananciaButton = document.getElementById("ingresarGanancia");
-    var ingresarPerdidaButton = document.getElementById("ingresarPerdida");
-    var ingresarGananciaPNLButton = document.getElementById("ingresarGananciaPNL");
-    var ingresarPerdidaPNLButton = document.getElementById("ingresarPerdidaPNL");
-    var resultadoDiv = document.getElementById("resultado");
-    var actividadDiv = document.getElementById("actividad");
-    var total = 0;
+    const montoInput = document.getElementById("monto");
+    const gananciaPerdidaInput = document.getElementById("gananciaPerdida");
+    const gananciaPerdidaPNLInput = document.getElementById("gananciaPerdidaPNL");
+    const ingresarMontoButton = document.getElementById("ingresarMonto");
+    const ingresarGananciaButton = document.getElementById("ingresarGanancia");
+    const ingresarPerdidaButton = document.getElementById("ingresarPerdida");
+    const ingresarGananciaPNLButton = document.getElementById("ingresarGananciaPNL");
+    const ingresarPerdidaPNLButton = document.getElementById("ingresarPerdidaPNL");
+    const resetButton = document.getElementById("reset");
+    const resultadoDiv = document.getElementById("resultado");
+    const actividadDiv = document.getElementById("actividad");
+    let total = 0;
+    let pnl = 0;
   
     // Funciones auxiliares
     function mostrarMensajeError(elemento) {
-      var mensaje = "Por favor, ingrese un valor válido.";
+      const mensaje = "Por favor, ingrese un valor válido.";
       elemento.classList.add("error");
       elemento.setAttribute("placeholder", mensaje);
     }
   
     function actualizarTotal() {
-      resultadoDiv.textContent = "$" + total.toFixed(2);
+      resultadoDiv.textContent = "$" + (total - pnl).toFixed(2);
     }
   
     function agregarActividad(mensaje) {
-      var p = document.createElement("p");
-      p.textContent = mensaje;
+      const p = document.createElement("p");
+      p.innerHTML = mensaje;
       actividadDiv.appendChild(p);
+    }
+  
+    function resetearValores() {
+      montoInput.value = "";
+      gananciaPerdidaInput.value = "";
+      gananciaPerdidaPNLInput.value = "";
+      total = 0;
+      pnl = 0;
+      actualizarTotal();
+      actividadDiv.innerHTML = "";
+      montoInput.classList.remove("error");
+      gananciaPerdidaInput.classList.remove("error");
+      gananciaPerdidaPNLInput.classList.remove("error");
     }
   
     // Evento de ingresar monto
     ingresarMontoButton.addEventListener("click", function() {
-      var monto = parseFloat(montoInput.value);
+      const monto = parseFloat(montoInput.value);
       if (!isNaN(monto)) {
         total += monto;
         actualizarTotal();
@@ -44,9 +59,9 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // Evento de ingresar ganancia
     ingresarGananciaButton.addEventListener("click", function() {
-      var ganancia = parseFloat(gananciaPerdidaInput.value);
+      const ganancia = parseFloat(gananciaPerdidaInput.value);
       if (!isNaN(ganancia)) {
-        total += ganancia;
+        total -= ganancia;
         actualizarTotal();
         agregarActividad("Ingresada ganancia: $" + ganancia.toFixed(2));
         gananciaPerdidaInput.value = "";
@@ -57,9 +72,9 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // Evento de ingresar pérdida
     ingresarPerdidaButton.addEventListener("click", function() {
-      var perdida = parseFloat(gananciaPerdidaInput.value);
+      const perdida = parseFloat(gananciaPerdidaInput.value);
       if (!isNaN(perdida)) {
-        total -= perdida;
+        total += perdida;
         actualizarTotal();
         agregarActividad("Ingresada pérdida: $" + perdida.toFixed(2));
         gananciaPerdidaInput.value = "";
@@ -70,12 +85,12 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // Evento de ingresar ganancia en PNL
     ingresarGananciaPNLButton.addEventListener("click", function() {
-      var gananciaPNL = parseFloat(gananciaPerdidaPNLInput.value);
+      const gananciaPNL = parseFloat(gananciaPerdidaPNLInput.value);
       if (!isNaN(gananciaPNL)) {
-        var gananciaPorcentaje = (gananciaPNL / total) * 100;
-        total += gananciaPNL;
+        const gananciaPorcentaje = (gananciaPNL / 100) * total;
+        pnl -= gananciaPorcentaje;
         actualizarTotal();
-        agregarActividad("Ingresada ganancia en PNL: $" + gananciaPNL.toFixed(2) + " (" + gananciaPorcentaje.toFixed(2) + "%)");
+        agregarActividad("Ingresada ganancia en PNL: " + gananciaPNL.toFixed(2) + "% ($" + gananciaPorcentaje.toFixed(2) + ")");
         gananciaPerdidaPNLInput.value = "";
       } else {
         mostrarMensajeError(gananciaPerdidaPNLInput);
@@ -84,16 +99,21 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // Evento de ingresar pérdida en PNL
     ingresarPerdidaPNLButton.addEventListener("click", function() {
-      var perdidaPNL = parseFloat(gananciaPerdidaPNLInput.value);
+      const perdidaPNL = parseFloat(gananciaPerdidaPNLInput.value);
       if (!isNaN(perdidaPNL)) {
-        var perdidaPorcentaje = (perdidaPNL / total) * 100;
-        total -= perdidaPNL;
+        const perdidaPorcentaje = (perdidaPNL / 100) * total;
+        pnl += perdidaPorcentaje;
         actualizarTotal();
-        agregarActividad("Ingresada pérdida en PNL: $" + perdidaPNL.toFixed(2) + " (" + perdidaPorcentaje.toFixed(2) + "%)");
+        agregarActividad("Ingresada pérdida en PNL: " + perdidaPNL.toFixed(2) + "% ($" + perdidaPorcentaje.toFixed(2) + ")");
         gananciaPerdidaPNLInput.value = "";
       } else {
         mostrarMensajeError(gananciaPerdidaPNLInput);
       }
+    });
+  
+    // Evento de resetear valores
+    resetButton.addEventListener("click", function() {
+      resetearValores();
     });
   });
   
